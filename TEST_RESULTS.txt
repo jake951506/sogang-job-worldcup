@@ -1,0 +1,34 @@
+Sogang Job World Cup Streamlit v3.1.1 - verification report
+Date: 2026-07-11
+
+Change verified
+---------------
+- "전임교원 급여 및 보상" is classified as 교무팀 in JOB_UNITS.
+- All four 교무팀 jobs are treated as one repeated unit during group assignment.
+- The visible job label remains unchanged so historical Google Sheets responses continue to aggregate under the same job name.
+
+Automated verification
+----------------------
+- pytest: 21 passed
+- Python compile check: passed
+- Additional single-axis group-assignment stress verification: 400 cases passed
+  - 200 cases without historical responses
+  - 200 cases with randomized same-survey historical seeding
+- In all 400 cases, the four 교무팀 jobs were assigned one each to A, B, C, and D.
+
+Constraint behavior
+-------------------
+- The app first attempts to satisfy same-survey seed pots, cross-survey seed pots, and same-team separation simultaneously.
+- If an exact simultaneous solution is mathematically unavailable, it keeps the tournament usable and minimizes same-team collisions, as documented in README.md.
+
+Regression coverage
+-------------------
+- Preference and avoidance group seeding
+- Cross-dispersion of preference history in avoidance groups
+- Same-team job separation
+- Group stage and knockout tournament flow
+- Third-place match and final ranks 1-4
+- Participant name handling
+- Google Sheets row creation and duplicate prevention
+- Streamlit app interaction flow
+- Local secrets conversion
