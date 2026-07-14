@@ -15,6 +15,7 @@ def build_toml(
     credentials: dict[str, Any],
     spreadsheet_id: str,
     access_code: str,
+    admin_password: str = "",
 ) -> str:
     required = (
         "type",
@@ -35,6 +36,7 @@ def build_toml(
     lines = [
         "[app]",
         f"access_code = {toml_string(access_code)}",
+        f"admin_password = {toml_string(admin_password)}",
         "require_google_storage = true",
         "",
         "[google_sheets]",
@@ -60,6 +62,7 @@ def main() -> int:
     parser.add_argument("service_account_json", type=Path)
     parser.add_argument("spreadsheet_id")
     parser.add_argument("--access-code", default="")
+    parser.add_argument("--admin-password", default="")
     parser.add_argument(
         "--output",
         type=Path,
@@ -80,7 +83,12 @@ def main() -> int:
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
-        build_toml(credentials, args.spreadsheet_id, args.access_code),
+        build_toml(
+            credentials,
+            args.spreadsheet_id,
+            args.access_code,
+            args.admin_password,
+        ),
         encoding="utf-8",
     )
     print(f"생성 완료: {args.output}")

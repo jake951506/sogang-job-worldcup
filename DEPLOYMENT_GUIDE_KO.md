@@ -101,3 +101,13 @@ git push -u origin main
 - 현재 참여자의 선호 결과는 본인의 기피 시드에서 제외되는가?
 - 조 1위 네 개가 서로 다른 8강 구역에 배치되는가?
 - 공용 PC에서 **다음 참여자 시작**이 이름과 세션 ID를 초기화하는가?
+
+## 관리자 통계 비밀번호 추가
+
+Streamlit Community Cloud의 `Settings → Secrets`에서 `[app]` 구역에 다음 한 줄을 추가합니다.
+
+```toml
+admin_password = "관리자만 아는 비밀번호"
+```
+
+저장 후 앱을 Reboot하면 사이드바의 `📊 관리자 통계`에서 사용할 수 있습니다. 조사 참여용 `access_code`와 관리자용 `admin_password`는 서로 다른 값으로 설정하는 것을 권장합니다.

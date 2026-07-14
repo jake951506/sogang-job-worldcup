@@ -12,6 +12,7 @@ from constants import (
     APP_VERSION,
     GROUP_NAMES,
     MAX_PARTICIPANT_NAME_LENGTH,
+    MAX_SELECTION_REASON_LENGTH,
     MODE_CONFIG,
     TOTAL_SELECTIONS,
 )
@@ -69,6 +70,8 @@ SURVEY_RESULT_HEADERS: tuple[str, ...] = (
     "same_unit_extra_jobs",
     "unit_separation_complete",
     "solver_fallback_used",
+    # v3.3 additions
+    "selection_reason",
 )
 
 GROUP_RESULT_HEADERS: tuple[str, ...] = (
@@ -181,6 +184,7 @@ def build_submission_bundle(
     *,
     participant_session_id: str,
     participant_name: str,
+    selection_reason: str = "",
     started_at: datetime,
     completed_at: datetime | None = None,
     response_id: str | None = None,
@@ -206,6 +210,12 @@ def build_submission_bundle(
     if len(normalized_name) > MAX_PARTICIPANT_NAME_LENGTH:
         raise ValueError(
             f"참여자 이름은 {MAX_PARTICIPANT_NAME_LENGTH}자 이하여야 합니다."
+        )
+
+    normalized_reason = " ".join(str(selection_reason).split())
+    if len(normalized_reason) > MAX_SELECTION_REASON_LENGTH:
+        raise ValueError(
+            f"선택 이유 메모는 {MAX_SELECTION_REASON_LENGTH}자 이하여야 합니다."
         )
 
     response_id = response_id or str(uuid.uuid4())
@@ -310,6 +320,7 @@ def build_submission_bundle(
             metadata.get("unit_separation_complete", False)
         ),
         "solver_fallback_used": bool(metadata.get("solver_fallback_used", False)),
+        "selection_reason": normalized_reason,
     }
 
     final_rank_by_job = {
@@ -590,6 +601,15 @@ class GoogleSheetsRepository:
             if valid:
                 rankings.append(normalized)
         return rankings
+
+    def load_admin_records(self) -> dict[str, list[dict[str, str]]]:
+        """관리자 통계 화면용으로 세 탭의 전체 레코드를 반환한다."""
+        self.ensure_schema()
+        return {
+            SURVEY_RESULTS_SHEET: self._worksheets[SURVEY_RESULTS_SHEET].get_all_records(),
+            GROUP_RESULTS_SHEET: self._worksheets[GROUP_RESULTS_SHEET].get_all_records(),
+            MATCH_RESULTS_SHEET: self._worksheets[MATCH_RESULTS_SHEET].get_all_records(),
+        }
 
     def save_submission(self, bundle: SubmissionBundle) -> dict[str, int | str]:
         self.ensure_schema()

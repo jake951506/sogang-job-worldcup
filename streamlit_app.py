@@ -17,6 +17,7 @@ from constants import (
     GROUP_NAMES,
     JOBS,
     MAX_PARTICIPANT_NAME_LENGTH,
+    MAX_SELECTION_REASON_LENGTH,
     MODE_CONFIG,
     TOTAL_SELECTIONS,
 )
@@ -43,67 +44,172 @@ def inject_css() -> None:
         """
         <style>
         .block-container {
-            max-width: 1120px;
-            padding-top: 1.6rem;
+            max-width: 1180px;
+            padding-top: 1.35rem;
             padding-bottom: 3rem;
         }
-        h1, h2, h3 { letter-spacing: -0.035em; }
+        h1, h2, h3 { letter-spacing: -0.035em; color: #1F2937; }
+        p, li, div, label { color: #111827; }
         div[data-testid="stMetric"] {
-            border: 1px solid rgba(49, 51, 63, 0.16);
-            border-radius: 0.85rem;
-            padding: 0.7rem 0.9rem;
-            background: rgba(255,255,255,0.55);
+            border: 1px solid rgba(17, 24, 39, 0.15);
+            border-radius: 1rem;
+            padding: 0.85rem 1rem;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+        }
+        div[data-testid="stMetric"] label,
+        div[data-testid="stMetricValue"] {
+            color: #111827 !important;
         }
         div[class*="st-key-choice-left-"] button,
         div[class*="st-key-choice-right-"] button {
-            min-height: 10.5rem;
+            min-height: 12rem;
             white-space: normal;
-            line-height: 1.5;
-            font-size: 1.08rem;
-            font-weight: 700;
+            line-height: 1.55;
+            font-size: 1.28rem;
+            font-weight: 800;
             border-width: 2px;
+            border-color: #A50034;
             border-radius: 1rem;
-            padding: 1.2rem;
+            padding: 1.35rem;
+            color: #111827;
+            background: #ffffff;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        }
+        div[class*="st-key-choice-left-"] button:hover,
+        div[class*="st-key-choice-right-"] button:hover {
+            border-color: #7F0028;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
         }
         div[class*="st-key-home-preference"] button,
         div[class*="st-key-home-avoidance"] button {
-            min-height: 4.2rem;
-            font-size: 1.05rem;
-            font-weight: 700;
+            min-height: 4.5rem;
+            font-size: 1.12rem;
+            font-weight: 800;
         }
         .hero-note {
-            padding: 0.9rem 1rem;
-            border-radius: 0.8rem;
-            background: rgba(165, 0, 52, 0.07);
-            border-left: 4px solid #A50034;
-            margin-bottom: 1rem;
-        }
-        .result-card {
             padding: 1.1rem 1.2rem;
-            border: 1px solid rgba(49, 51, 63, 0.16);
+            border-radius: 0.95rem;
+            background: #FFF5F7;
+            border: 1px solid rgba(165, 0, 52, 0.18);
+            border-left: 6px solid #A50034;
+            margin-bottom: 1rem;
+            color: #111827;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .notice-note {
+            padding: 1rem 1.15rem;
+            border-radius: 0.95rem;
+            background: #F9FAFB;
+            border: 1px solid rgba(17, 24, 39, 0.10);
+            margin-bottom: 1rem;
+            color: #111827;
+            font-size: 1rem;
+            line-height: 1.65;
+        }
+        .stage-banner {
+            padding: 1rem 1.2rem;
             border-radius: 1rem;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.9rem;
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            background: #EFF6FF;
+            color: #0F172A;
+        }
+        .stage-banner .stage-eyebrow {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #1D4ED8;
+            margin-bottom: 0.2rem;
+        }
+        .stage-banner .stage-title {
+            font-size: 1.65rem;
+            font-weight: 900;
+            line-height: 1.25;
+            margin-bottom: 0.25rem;
+        }
+        .stage-banner .stage-desc {
+            font-size: 1.02rem;
+            line-height: 1.55;
+            color: #1F2937;
+        }
+        .third-place-banner {
+            padding: 1.15rem 1.25rem;
+            border-radius: 1rem;
+            margin-bottom: 0.95rem;
+            border: 2px solid rgba(217, 119, 6, 0.30);
+            background: #FFF7ED;
+            color: #7C2D12;
+        }
+        .third-place-banner .stage-eyebrow {
+            font-size: 0.98rem;
+            font-weight: 900;
+            color: #B45309;
+            margin-bottom: 0.25rem;
+        }
+        .third-place-banner .stage-title {
+            font-size: 1.7rem;
+            font-weight: 900;
+            line-height: 1.24;
+            margin-bottom: 0.3rem;
+            color: #9A3412;
+        }
+        .third-place-banner .stage-desc {
+            font-size: 1.06rem;
+            line-height: 1.58;
+            color: #7C2D12;
         }
         .jk-credit {
             text-align: right;
-            font-size: 0.82rem;
-            font-weight: 650;
+            font-size: 0.92rem;
+            font-weight: 750;
             letter-spacing: 0.015em;
-            color: rgba(49, 51, 63, 0.68);
-            margin-top: -0.55rem;
-            margin-bottom: 0.1rem;
+            color: #4B5563;
+            margin-top: -0.15rem;
+            margin-bottom: 0.35rem;
         }
         .participant-note {
             text-align: right;
-            font-size: 0.9rem;
-            color: rgba(49, 51, 63, 0.72);
-            margin-bottom: 0.35rem;
+            font-size: 0.98rem;
+            color: #374151;
+            margin-bottom: 0.45rem;
+            font-weight: 600;
         }
+        .big-question {
+            font-size: 1.55rem;
+            font-weight: 900;
+            color: #111827;
+            margin: 0.6rem 0 0.2rem;
+        }
+        .placement-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.05rem 1.2rem;
+            margin-bottom: 0.75rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(17, 24, 39, 0.13);
+            background: #ffffff;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, 0.06);
+        }
+        .placement-card.gold { background: #FFF8D9; border-color: #D4AF37; }
+        .placement-card.silver { background: #F3F4F6; border-color: #9CA3AF; }
+        .placement-card.bronze { background: #FFF1E6; border-color: #CD7F32; }
+        .placement-card.fourth { background: #F8FAFC; border-color: #CBD5E1; }
+        .placement-medal { font-size: 2rem; min-width: 3rem; text-align: center; }
+        .placement-rank { font-size: 1.05rem; font-weight: 900; color: #4B5563; }
+        .placement-job { font-size: 1.25rem; font-weight: 900; color: #111827; line-height: 1.35; }
         @media (max-width: 640px) {
             div[class*="st-key-choice-left-"] button,
             div[class*="st-key-choice-right-"] button {
-                min-height: 8.5rem;
-                font-size: 0.98rem;
+                min-height: 9.6rem;
+                font-size: 1.06rem;
+                padding: 1rem;
+            }
+            .stage-banner .stage-title,
+            .third-place-banner .stage-title,
+            .big-question {
+                font-size: 1.28rem;
             }
         }
         </style>
@@ -140,6 +246,8 @@ def init_state() -> None:
         "history_warning": "",
         "access_granted": False,
         "participation_finished": False,
+        "selection_reason": "",
+        "admin_granted": False,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -287,6 +395,7 @@ def start_tournament(mode: str) -> None:
     st.session_state.save_error = ""
     st.session_state.save_receipt = None
     st.session_state.participation_finished = False
+    st.session_state.selection_reason = ""
     st.session_state.page = "tournament"
     st.rerun()
 
@@ -302,6 +411,7 @@ def reset_to_home() -> None:
     st.session_state.save_receipt = None
     st.session_state.history_warning = ""
     st.session_state.participation_finished = False
+    st.session_state.selection_reason = ""
     st.rerun()
 
 
@@ -337,6 +447,8 @@ def start_next_participant() -> None:
     st.session_state.save_receipt = None
     st.session_state.history_warning = ""
     st.session_state.participation_finished = False
+    st.session_state.selection_reason = ""
+    st.session_state.admin_granted = False
     st.session_state.access_granted = access_granted
     st.rerun()
 
@@ -361,6 +473,11 @@ def render_sidebar() -> None:
             with st.expander("연결 상태 보기"):
                 st.write(error)
 
+        st.divider()
+        if st.button("📊 관리자 통계", width="stretch"):
+            st.session_state.page = "admin"
+            st.rerun()
+
         if st.session_state.page == "tournament":
             st.divider()
             st.warning("중단하면 현재 진행 기록은 저장되지 않습니다.")
@@ -381,6 +498,16 @@ def render_home() -> None:
         선호조사 또는 기피조사 중 한 가지만 하고 마쳐도 됩니다. 한 조사를
         완료한 뒤에는 나머지 조사도 계속할지, 여기서 참여를 마칠지 직접
         선택하게 됩니다.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        """
+        <div class="notice-note">
+        <strong>주의사항</strong><br>
+        현재 각 팀의 담당자는 아래 직무만 하는 업무는 아니며, 아래 업무를
+        포함한 업무를 수행중임.
         </div>
         """,
         unsafe_allow_html=True,
@@ -461,8 +588,16 @@ def render_home() -> None:
             8강 구역에 있어 4강 전에는 만나지 않습니다. 4강이 끝난 뒤
             3·4위전을 먼저 하고 결승을 진행해 최종 1~4위를 모두 확정합니다.
 
+            **전체 경기 수:** 각 조에서 총 10게임을 하기에 조별예선은 총
+            40게임입니다. 이후 16강부터 3·4위전 및 결승까지 총 16게임이
+            진행되어, 한 조사당 총 56회 선택합니다.
+
+            **누적 데이터 반영:** 참가 데이터가 쌓일수록 과거 조별예선에서
+            상위권에 자주 오른 직무들이 같은 예선조에 함께 편성될 가능성이
+            낮아질 수 있습니다.
+
             **선택:** 직무 카드를 마우스로 누르거나 키보드 숫자 `1`, `2`를
-            누릅니다. 한 조사당 총 56회 선택합니다.
+            누릅니다.
             """
         )
 
@@ -573,17 +708,48 @@ def render_tournament_header(session: TournamentSession) -> None:
 def render_match(session: TournamentSession) -> None:
     match = session.current_match
     if session.phase == "group_match":
+        st.markdown(
+            f"""
+            <div class="stage-banner">
+                <div class="stage-eyebrow">예선조 진행 중</div>
+                <div class="stage-title">현재는 {session.current_group}조 예선입니다</div>
+                <div class="stage-desc">
+                    20강 조별리그 {session.group_match_index + 1}/10경기 ·
+                    <strong>5개 직무 중 1개 직무만 탈락</strong>하고,
+                    나머지 4개 직무는 16강에 진출합니다.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         st.subheader(
-            f"20강 조별리그 · {session.current_group}조 · "
+            f"20강 조별리그 · {session.current_group}조 예선 · "
             f"{session.group_match_index + 1}/10경기"
         )
     else:
+        if session.current_round == "3·4위전":
+            st.markdown(
+                """
+                <div class="third-place-banner">
+                    <div class="stage-eyebrow">결승전 전에 진행됩니다</div>
+                    <div class="stage-title">지금은 결승전이 아니라 3·4위전입니다</div>
+                    <div class="stage-desc">
+                        4강 패자 두 직무가 먼저 3위와 4위를 결정합니다.
+                        이 경기가 끝난 뒤에 결승전이 이어집니다.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
         st.subheader(
             f"{session.current_round} · "
             f"{session.knockout_match_index + 1}/{len(session.knockout_matches)}경기"
         )
 
-    st.markdown(f"### {MODE_CONFIG[session.mode]['question']}")
+    st.markdown(
+        f'<div class="big-question">{MODE_CONFIG[session.mode]["question"]}</div>',
+        unsafe_allow_html=True,
+    )
     st.caption("왼쪽은 키보드 1, 오른쪽은 키보드 2로도 선택할 수 있습니다.")
 
     left_col, right_col = st.columns(2, gap="large")
@@ -613,18 +779,10 @@ def render_match(session: TournamentSession) -> None:
 def handle_choice(session: TournamentSession, side: int) -> None:
     event = session.record_choice(side)  # type: ignore[arg-type]
     if event == "finished":
-        started_at = st.session_state.tournament_started_at
-        if not isinstance(started_at, datetime):
-            started_at = datetime.now(timezone.utc)
-        bundle = build_submission_bundle(
-            session,
-            participant_session_id=st.session_state.participant_session_id,
-            participant_name=st.session_state.participant_name,
-            started_at=started_at,
-        )
-        st.session_state.submission_bundle = bundle
-        st.session_state.save_state = "pending"
-        st.session_state.page = "result"
+        st.session_state.selection_reason = ""
+        st.session_state.submission_bundle = None
+        st.session_state.save_state = "idle"
+        st.session_state.page = "memo_entry"
     st.rerun()
 
 
@@ -637,7 +795,7 @@ def render_group_summary(session: TournamentSession) -> None:
     st.subheader(f"{group_name}조 최종 순위")
     table = pd.DataFrame(session.completed_group_table(group_name))
     st.dataframe(table, hide_index=True, width="stretch")
-    st.info("1~4위는 16강 진출, 5위는 탈락입니다.")
+    st.info("예선조 결과 안내: 1~4위는 16강 진출, 5위 단 1개 직무만 탈락합니다.")
 
     is_last_group = session.group_index == len(GROUP_NAMES) - 1
     label = "16강 대진 시작" if is_last_group else "다음 조 진행"
@@ -655,6 +813,21 @@ def render_group_summary(session: TournamentSession) -> None:
 def render_round_summary(session: TournamentSession) -> None:
     completed_round = session.last_completed_round or session.current_round
     st.subheader(f"{completed_round} 종료")
+
+    if completed_round == "4강":
+        st.markdown(
+            """
+            <div class="third-place-banner">
+                <div class="stage-eyebrow">다음 단계 안내</div>
+                <div class="stage-title">이제 결승전 전에 3·4위전을 먼저 진행합니다</div>
+                <div class="stage-desc">
+                    지금부터는 결승전이 아니라 4강 패자끼리의 3·4위전이 먼저 시작됩니다.
+                    3위와 4위를 확정한 뒤에 마지막으로 결승전을 진행합니다.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if completed_round == "3·4위전":
         rows = [
@@ -724,6 +897,61 @@ def render_tournament() -> None:
     elif session.phase == "finished":
         st.session_state.page = "result"
         st.rerun()
+
+
+def finalize_submission(session: TournamentSession, selection_reason: str) -> None:
+    started_at = st.session_state.tournament_started_at
+    if not isinstance(started_at, datetime):
+        started_at = datetime.now(timezone.utc)
+    bundle = build_submission_bundle(
+        session,
+        participant_session_id=st.session_state.participant_session_id,
+        participant_name=st.session_state.participant_name,
+        selection_reason=selection_reason,
+        started_at=started_at,
+    )
+    st.session_state.selection_reason = selection_reason
+    st.session_state.submission_bundle = bundle
+    st.session_state.save_state = "pending"
+    st.session_state.page = "result"
+    st.rerun()
+
+
+def render_memo_entry() -> None:
+    session = st.session_state.tournament
+    if not isinstance(session, TournamentSession) or session.phase != "finished":
+        st.error("완료된 조사 상태를 찾을 수 없습니다.")
+        return
+    config = MODE_CONFIG[session.mode]
+    st.title(f"📝 {config['label']} 선택 이유 메모")
+    st.markdown(
+        """
+        <div class="hero-note">
+        <strong>선택사항입니다.</strong><br>
+        최종 선택이나 진행 중 판단에 영향을 준 이유, 직무에 대한 인상,
+        추가 의견을 자유롭게 적어 주세요. 작성하지 않고 바로 결과를 볼 수도 있습니다.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    reason = st.text_area(
+        "선택 이유 또는 추가 의견",
+        value=str(st.session_state.get("selection_reason", "")),
+        max_chars=MAX_SELECTION_REASON_LENGTH,
+        height=170,
+        placeholder="예: 업무의 책임 범위와 일정 부담을 중심으로 선택했습니다.",
+    )
+    st.caption(
+        f"선택 입력 · 최대 {MAX_SELECTION_REASON_LENGTH}자 · "
+        "Google Sheets 결과와 함께 저장됩니다."
+    )
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        if st.button("메모와 함께 결과 저장", type="primary", width="stretch"):
+            finalize_submission(session, reason.strip())
+    with col2:
+        if st.button("메모 없이 결과 저장", width="stretch"):
+            finalize_submission(session, "")
 
 
 def attempt_save(bundle: SubmissionBundle) -> None:
@@ -821,16 +1049,25 @@ def render_result() -> None:
     st.title(f"{config['icon']} {config['label']} 완료")
     st.caption(f"참여자: {st.session_state.participant_name}")
 
-    first, second = st.columns(2, gap="large")
-    with first:
-        st.metric(config["winner_label"], session.champion or "-")
-    with second:
-        st.metric(config["runner_label"], session.runner_up or "-")
-    third, fourth = st.columns(2, gap="large")
-    with third:
-        st.metric(config["third_label"], session.third_place or "-")
-    with fourth:
-        st.metric(config["fourth_label"], session.fourth_place or "-")
+    placements = [
+        (1, "🥇", "gold", session.champion or "-"),
+        (2, "🥈", "silver", session.runner_up or "-"),
+        (3, "🥉", "bronze", session.third_place or "-"),
+        (4, "4위", "fourth", session.fourth_place or "-"),
+    ]
+    for rank, medal, css_class, job in placements:
+        card_html = (
+            f'<div class="placement-card {css_class}">'
+            f'<div class="placement-medal">{medal}</div>'
+            f'<div><div class="placement-rank">최종 {rank}위</div>'
+            f'<div class="placement-job">{html.escape(job)}</div></div>'
+            '</div>'
+        )
+        st.markdown(card_html, unsafe_allow_html=True)
+
+    if st.session_state.get("selection_reason"):
+        with st.expander("작성한 선택 이유 메모", expanded=True):
+            st.write(st.session_state.selection_reason)
 
     render_save_status(bundle)
     render_result_tables(session)
@@ -884,12 +1121,174 @@ def render_result() -> None:
     else:
         st.success("선호조사와 기피조사를 모두 완료했습니다.")
         if st.button(
-            "두 조사 참여 마치기",
+            "두 조사 모두 마치기를 눌러서 최종 선호조사/기피조사 결과를 확인하세요",
             type="primary",
             width="stretch",
             disabled=navigation_blocked,
         ):
             finish_participation()
+
+def render_admin() -> None:
+    configured_password = str(read_optional_app_setting("admin_password", "")).strip()
+    st.title("📊 관리자 통계")
+    if not configured_password:
+        st.warning(
+            "관리자 비밀번호가 설정되지 않았습니다. Streamlit Secrets의 [app] 아래에 "
+            '`admin_password = "원하는비밀번호"`를 추가해 주세요.'
+        )
+        if st.button("처음 화면으로"):
+            reset_to_home()
+        return
+
+    if not st.session_state.get("admin_granted", False):
+        entered = st.text_input("관리자 비밀번호", type="password")
+        if st.button("관리자 통계 열기", type="primary", width="stretch"):
+            if hmac.compare_digest(entered, configured_password):
+                st.session_state.admin_granted = True
+                st.rerun()
+            st.error("관리자 비밀번호가 올바르지 않습니다.")
+        return
+
+    repository, error = get_repository()
+    if repository is None:
+        st.error("Google Sheets에 연결할 수 없습니다.")
+        st.caption(error)
+        return
+
+    try:
+        records = repository.load_admin_records()
+    except Exception as exc:
+        st.error(f"관리자 데이터를 읽지 못했습니다: {exc}")
+        return
+
+    summary = pd.DataFrame(records.get("survey_results", []))
+    groups = pd.DataFrame(records.get("group_results", []))
+    matches = pd.DataFrame(records.get("match_results", []))
+    if summary.empty:
+        st.info("아직 완료된 응답이 없습니다.")
+        return
+    if "status" in summary.columns:
+        summary = summary[summary["status"].astype(str) == "completed"].copy()
+
+    mode_options = {"전체": "all", "선호조사": "preference", "기피조사": "avoidance"}
+    selected_label = st.selectbox("조사 유형", list(mode_options))
+    selected_mode = mode_options[selected_label]
+    if selected_mode == "all":
+        filtered = summary.copy()
+    else:
+        filtered = summary[summary["mode"].astype(str) == selected_mode].copy()
+
+    filtered_ids = set(filtered.get("response_id", pd.Series(dtype=str)).astype(str))
+    if not groups.empty and "response_id" in groups.columns:
+        filtered_groups = groups[groups["response_id"].astype(str).isin(filtered_ids)].copy()
+    else:
+        filtered_groups = pd.DataFrame()
+    if not matches.empty and "response_id" in matches.columns:
+        filtered_matches = matches[matches["response_id"].astype(str).isin(filtered_ids)].copy()
+    else:
+        filtered_matches = pd.DataFrame()
+
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("완료 응답", len(filtered))
+    participant_count = (
+        filtered["participant_session_id"].astype(str).nunique()
+        if "participant_session_id" in filtered.columns else 0
+    )
+    m2.metric("참여자 수", participant_count)
+    m3.metric("선택 경기", len(filtered_matches))
+    if "selection_reason" in filtered.columns:
+        memo_count = int(
+            filtered["selection_reason"].fillna("").astype(str).str.strip().ne("").sum()
+        )
+    else:
+        memo_count = 0
+    m4.metric("메모 작성", memo_count)
+
+    st.subheader("최종 1~4위 종합 순위")
+    rank_columns = [
+        ("champion", "1위", 4),
+        ("runner_up", "2위", 3),
+        ("third_place", "3위", 2),
+        ("fourth_place", "4위", 1),
+    ]
+    rows: list[dict[str, object]] = []
+    for column, label, weight in rank_columns:
+        if column not in filtered.columns:
+            continue
+        for job in filtered[column].dropna().astype(str):
+            if job:
+                rows.append({"직무": job, "순위": label, "가중점수": weight})
+    rank_df = pd.DataFrame(rows)
+    if rank_df.empty:
+        st.info("순위 데이터가 없습니다.")
+    else:
+        counts = rank_df.pivot_table(
+            index="직무",
+            columns="순위",
+            values="가중점수",
+            aggfunc="count",
+            fill_value=0,
+        )
+        for col in ["1위", "2위", "3위", "4위"]:
+            if col not in counts.columns:
+                counts[col] = 0
+        counts["종합점수"] = rank_df.groupby("직무")["가중점수"].sum()
+        counts["Top4 진입"] = counts[["1위", "2위", "3위", "4위"]].sum(axis=1)
+        counts = counts.sort_values(["종합점수", "1위", "2위"], ascending=False)
+        st.caption("종합점수는 1위 4점, 2위 3점, 3위 2점, 4위 1점으로 계산합니다.")
+        st.bar_chart(counts[["종합점수"]].head(15))
+        st.dataframe(counts.reset_index(), hide_index=True, width="stretch")
+
+    if not filtered_groups.empty and {"job", "group_rank"}.issubset(filtered_groups.columns):
+        st.subheader("조별예선 성과")
+        gf = filtered_groups.copy()
+        gf["group_rank"] = pd.to_numeric(gf["group_rank"], errors="coerce")
+        group_stats = gf.groupby("job").agg(
+            예선출전=("response_id", "count"),
+            조1위=("group_rank", lambda s: int((s == 1).sum())),
+            조2위이내=("group_rank", lambda s: int((s <= 2).sum())),
+            조5위탈락=("group_rank", lambda s: int((s == 5).sum())),
+            평균조순위=("group_rank", "mean"),
+        ).sort_values(["조1위", "조2위이내"], ascending=False)
+        group_stats["평균조순위"] = group_stats["평균조순위"].round(2)
+        st.dataframe(
+            group_stats.reset_index().rename(columns={"job": "직무"}),
+            hide_index=True,
+            width="stretch",
+        )
+
+    st.subheader("참여자 결과 및 선택 이유")
+    display_cols = [
+        col for col in [
+            "completed_at_kst", "participant_name", "mode_label", "champion",
+            "runner_up", "third_place", "fourth_place", "selection_reason"
+        ] if col in filtered.columns
+    ]
+    display = filtered[display_cols].copy()
+    if "completed_at_kst" in display.columns:
+        display = display.sort_values("completed_at_kst", ascending=False)
+    display = display.rename(columns={
+        "completed_at_kst": "완료시각",
+        "participant_name": "이름",
+        "mode_label": "조사",
+        "champion": "1위",
+        "runner_up": "2위",
+        "third_place": "3위",
+        "fourth_place": "4위",
+        "selection_reason": "선택 이유 메모",
+    })
+    st.dataframe(display, hide_index=True, width="stretch")
+    st.download_button(
+        "현재 통계 CSV 다운로드",
+        data=display.to_csv(index=False).encode("utf-8-sig"),
+        file_name=f"sogang_job_worldcup_admin_{selected_mode}.csv",
+        mime="text/csv",
+        width="stretch",
+    )
+    if st.button("관리자 화면 닫기", width="stretch"):
+        st.session_state.admin_granted = False
+        reset_to_home()
+
 
 def render_completion() -> None:
     completed = st.session_state.completed_results
@@ -952,8 +1351,12 @@ def main() -> None:
         render_name_entry()
     elif page == "tournament":
         render_tournament()
+    elif page == "memo_entry":
+        render_memo_entry()
     elif page == "result":
         render_result()
+    elif page == "admin":
+        render_admin()
     elif page == "complete":
         render_completion()
     else:

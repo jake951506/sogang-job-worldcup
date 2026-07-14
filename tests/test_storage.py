@@ -49,6 +49,7 @@ def test_submission_bundle_has_name_top4_and_all_detail_rows() -> None:
         session,
         participant_session_id="participant-test",
         participant_name=" 김재경 ",
+        selection_reason="  업무 책임과 일정 부담을 고려함  ",
         started_at=started,
         completed_at=completed,
         response_id="response-test",
@@ -56,6 +57,7 @@ def test_submission_bundle_has_name_top4_and_all_detail_rows() -> None:
 
     assert bundle.response_id == "response-test"
     assert bundle.summary_row["participant_name"] == "김재경"
+    assert bundle.summary_row["selection_reason"] == "업무 책임과 일정 부담을 고려함"
     assert bundle.summary_row["selection_count"] == 56
     assert bundle.summary_row["duration_seconds"] == 720
     assert bundle.summary_row["third_place"] == session.third_place

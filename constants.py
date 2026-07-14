@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from typing import Final
 
-APP_VERSION: Final[str] = "3.1.1"
+APP_VERSION: Final[str] = "3.3.1"
 APP_TITLE: Final[str] = "서강대학교 본부 직무 이상형 월드컵"
 APP_CREDIT: Final[str] = "Developed by JK"
 MAX_PARTICIPANT_NAME_LENGTH: Final[int] = 40
+MAX_SELECTION_REASON_LENGTH: Final[int] = 1000
 
 JOBS: Final[tuple[str, ...]] = (
     "교무팀 - 전임교원 업적평가·승진·재임용",
