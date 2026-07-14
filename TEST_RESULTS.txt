@@ -1,15 +1,16 @@
-Sogang Job World Cup Streamlit v3.5.0 - verification report
+Sogang Job World Cup Streamlit v3.5.2 - verification report
 Date: 2026-07-15
 
-Verified changes
-----------------
-- Python compile check passed.
-- Two Academic Affairs job labels now include `교무팀 -`.
-- Legacy names are canonicalized for seeding and administrator statistics.
-- Match-card typography, border thickness, shadow, and mobile styling were increased.
-- Administrator ranking graph now uses four rank-specific colors instead of a single blue series.
+Change verified
+---------------
+- Choice cards separate team, job title, and stage/seed into readable lines.
+- Group-stage cards display labels such as `A조 예선`.
+- Visible shortcut badges inside buttons are hidden while keyboard shortcuts remain configured.
+- Card typography, border, shadow, spacing, and hover styling were strengthened.
 
-Compatibility
--------------
-- Google Sheets column structure is unchanged.
-- Existing rows using the old two job labels are combined with the new labels in seeding and administrator statistics.
+Verification
+------------
+- Python compile check: passed
+- Card-label formatting helper checks: passed
+- Tournament and storage logic unchanged
+- Existing Google Sheets schema and historical data compatibility unchanged

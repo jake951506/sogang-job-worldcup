@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-APP_VERSION: Final[str] = "3.5.0"
+APP_VERSION: Final[str] = "3.5.2"
 APP_TITLE: Final[str] = "서강대학교 본부 직무 이상형 월드컵"
 APP_CREDIT: Final[str] = "Developed by JK"
 MAX_PARTICIPANT_NAME_LENGTH: Final[int] = 40
@@ -10,7 +10,7 @@ MAX_SELECTION_REASON_LENGTH: Final[int] = 1000
 
 JOBS: Final[tuple[str, ...]] = (
     "교무팀 - 전임교원 업적평가·승진·재임용",
-    "교무팀 - 전임교원 책임시수",
+    "교무팀 - 전임교원 책임시수(교수노조)",
     "교무팀 - 전임교원 급여 및 보상",
     "교무팀 - 전임교원 신규임용",
     "학사지원팀 - 교과과정 개설·운영",
@@ -33,6 +33,7 @@ JOBS: Final[tuple[str, ...]] = (
 
 # 구버전 Google Sheets에 저장된 직무명을 현재 표준 직무명으로 합산하기 위한 별칭입니다.
 LEGACY_JOB_NAME_ALIASES: Final[dict[str, str]] = {
+    "교무팀 - 전임교원 책임시수": "교무팀 - 전임교원 책임시수(교수노조)",
     "전임교원 급여 및 보상": "교무팀 - 전임교원 급여 및 보상",
     "전임교원 신규임용": "교무팀 - 전임교원 신규임용",
 }

@@ -64,30 +64,55 @@ def inject_css() -> None:
         }
         div[class*="st-key-choice-left-"] button,
         div[class*="st-key-choice-right-"] button {
-            min-height: 14rem;
-            white-space: normal;
-            line-height: 1.55;
-            font-size: 1.52rem;
+            min-height: 11.8rem;
+            white-space: pre-line;
+            line-height: 1.38;
+            font-size: 1.72rem;
             font-weight: 900;
-            border-width: 4px;
-            border-color: #A50034;
-            border-radius: 1.35rem;
-            padding: 1.65rem 1.45rem;
+            border: 5px solid #A50034;
+            border-radius: 1.45rem;
+            padding: 1.25rem 1.55rem;
             color: #111827;
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF7FA 100%);
-            box-shadow: 0 10px 26px rgba(74, 4, 28, 0.14), inset 0 0 0 1px rgba(255,255,255,0.8);
-            transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+            background: linear-gradient(150deg, #FFFFFF 0%, #FFF8FA 68%, #FFF0F5 100%);
+            box-shadow: 0 12px 30px rgba(74, 4, 28, 0.17), inset 0 0 0 2px rgba(255,255,255,0.95);
+            transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+        }
+        div[class*="st-key-choice-left-"] button p,
+        div[class*="st-key-choice-right-"] button p {
+            white-space: pre-line;
+            font-size: inherit;
+            line-height: inherit;
+            font-weight: inherit;
+            margin: 0;
         }
         div[class*="st-key-choice-left-"] button:hover,
         div[class*="st-key-choice-right-"] button:hover {
-            border-color: #6F001F;
-            transform: translateY(-2px);
-            box-shadow: 0 14px 32px rgba(74, 4, 28, 0.20), inset 0 0 0 1px rgba(255,255,255,0.9);
+            border-color: #720023;
+            transform: translateY(-4px) scale(1.008);
+            background: linear-gradient(150deg, #FFFFFF 0%, #FFF2F6 70%, #FFE5EE 100%);
+            box-shadow: 0 18px 38px rgba(74, 4, 28, 0.24), inset 0 0 0 2px rgba(255,255,255,0.98);
         }
         div[class*="st-key-choice-left-"] button:focus,
         div[class*="st-key-choice-right-"] button:focus {
-            outline: 4px solid rgba(165, 0, 52, 0.20);
-            outline-offset: 3px;
+            outline: 5px solid rgba(165, 0, 52, 0.22);
+            outline-offset: 4px;
+        }
+        /* 키보드 단축키는 유지하되 카드 안의 작은 1·2 배지는 숨깁니다. */
+        div[class*="st-key-choice-left-"] button kbd,
+        div[class*="st-key-choice-right-"] button kbd,
+        div[class*="st-key-choice-left-"] button [data-testid*="Shortcut"],
+        div[class*="st-key-choice-right-"] button [data-testid*="Shortcut"],
+        div[class*="st-key-choice-left-"] button [data-testid*="shortcut"],
+        div[class*="st-key-choice-right-"] button [data-testid*="shortcut"] {
+            display: none !important;
+        }
+        .choice-side-label {
+            text-align: center;
+            font-size: 1.05rem;
+            font-weight: 850;
+            color: #7A0026;
+            margin: 0.1rem 0 0.45rem;
+            letter-spacing: -0.01em;
         }
         div[class*="st-key-home-preference"] button,
         div[class*="st-key-home-avoidance"] button {
@@ -714,6 +739,17 @@ def render_tournament_header(session: TournamentSession) -> None:
     if st.session_state.history_warning:
         st.warning(st.session_state.history_warning)
 
+def format_choice_card(job: str, seed: str, *, group_stage: bool) -> str:
+    """선택 카드에서 소속·핵심 직무·단계 정보를 읽기 쉽게 분리한다."""
+    if " - " in job:
+        unit, role = job.split(" - ", 1)
+    else:
+        unit, role = "담당 업무", job
+
+    stage_label = f"{seed} 예선" if group_stage and not seed.endswith("예선") else seed
+    return f"{unit}\n\n{role}\n\n{stage_label}"
+
+
 def render_match(session: TournamentSession) -> None:
     match = session.current_match
     if session.phase == "group_match":
@@ -764,16 +800,36 @@ def render_match(session: TournamentSession) -> None:
     left_col, right_col = st.columns(2, gap="large")
     match_key = session.selection_count + 1
 
+    group_stage = session.phase == "group_match"
+    left_label = format_choice_card(
+        match.left.job,
+        match.left.seed,
+        group_stage=group_stage,
+    )
+    right_label = format_choice_card(
+        match.right.job,
+        match.right.seed,
+        group_stage=group_stage,
+    )
+
     with left_col:
+        st.markdown(
+            '<div class="choice-side-label">① 왼쪽 직무 · 키보드 1</div>',
+            unsafe_allow_html=True,
+        )
         left_clicked = st.button(
-            f"① {match.left.job}\n\n{match.left.seed}",
+            left_label,
             key=f"choice-left-{match_key}",
             shortcut="1",
             width="stretch",
         )
     with right_col:
+        st.markdown(
+            '<div class="choice-side-label">② 오른쪽 직무 · 키보드 2</div>',
+            unsafe_allow_html=True,
+        )
         right_clicked = st.button(
-            f"② {match.right.job}\n\n{match.right.seed}",
+            right_label,
             key=f"choice-right-{match_key}",
             shortcut="2",
             width="stretch",
