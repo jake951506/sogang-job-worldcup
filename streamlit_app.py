@@ -20,6 +20,7 @@ from constants import (
     MAX_SELECTION_REASON_LENGTH,
     MODE_CONFIG,
     TOTAL_SELECTIONS,
+    canonical_job_name,
 )
 from seeding import compute_historical_stats, make_balanced_groups
 from storage import (
@@ -63,23 +64,30 @@ def inject_css() -> None:
         }
         div[class*="st-key-choice-left-"] button,
         div[class*="st-key-choice-right-"] button {
-            min-height: 12rem;
+            min-height: 14rem;
             white-space: normal;
             line-height: 1.55;
-            font-size: 1.28rem;
-            font-weight: 800;
-            border-width: 2px;
+            font-size: 1.52rem;
+            font-weight: 900;
+            border-width: 4px;
             border-color: #A50034;
-            border-radius: 1rem;
-            padding: 1.35rem;
+            border-radius: 1.35rem;
+            padding: 1.65rem 1.45rem;
             color: #111827;
-            background: #ffffff;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+            background: linear-gradient(145deg, #FFFFFF 0%, #FFF7FA 100%);
+            box-shadow: 0 10px 26px rgba(74, 4, 28, 0.14), inset 0 0 0 1px rgba(255,255,255,0.8);
+            transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
         }
         div[class*="st-key-choice-left-"] button:hover,
         div[class*="st-key-choice-right-"] button:hover {
-            border-color: #7F0028;
-            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+            border-color: #6F001F;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 32px rgba(74, 4, 28, 0.20), inset 0 0 0 1px rgba(255,255,255,0.9);
+        }
+        div[class*="st-key-choice-left-"] button:focus,
+        div[class*="st-key-choice-right-"] button:focus {
+            outline: 4px solid rgba(165, 0, 52, 0.20);
+            outline-offset: 3px;
         }
         div[class*="st-key-home-preference"] button,
         div[class*="st-key-home-avoidance"] button {
@@ -202,9 +210,10 @@ def inject_css() -> None:
         @media (max-width: 640px) {
             div[class*="st-key-choice-left-"] button,
             div[class*="st-key-choice-right-"] button {
-                min-height: 9.6rem;
-                font-size: 1.06rem;
-                padding: 1rem;
+                min-height: 11rem;
+                font-size: 1.22rem;
+                padding: 1.15rem;
+                border-width: 3px;
             }
             .stage-banner .stage-title,
             .third-place-banner .stage-title,
@@ -1128,6 +1137,68 @@ def render_result() -> None:
         ):
             finish_participation()
 
+def build_admin_top4(summary: pd.DataFrame, mode: str) -> pd.DataFrame:
+    """관리자 화면 상단용 누적 Top 4를 계산한다."""
+    mode_rows = summary[summary.get("mode", pd.Series(dtype=str)).astype(str) == mode].copy()
+    rank_columns = [
+        ("champion", "1위", 4),
+        ("runner_up", "2위", 3),
+        ("third_place", "3위", 2),
+        ("fourth_place", "4위", 1),
+    ]
+    rows: list[dict[str, object]] = []
+    for column, label, weight in rank_columns:
+        if column not in mode_rows.columns:
+            continue
+        for job in mode_rows[column].fillna("").astype(str):
+            job = job.strip()
+            if job:
+                rows.append({"직무": job, "결과순위": label, "가중점수": weight})
+    if not rows:
+        return pd.DataFrame(columns=["순위", "직무", "종합점수", "1위", "2위", "3위", "4위"])
+
+    rank_df = pd.DataFrame(rows)
+    counts = rank_df.pivot_table(
+        index="직무",
+        columns="결과순위",
+        values="가중점수",
+        aggfunc="count",
+        fill_value=0,
+    )
+    for col in ["1위", "2위", "3위", "4위"]:
+        if col not in counts.columns:
+            counts[col] = 0
+    counts["종합점수"] = rank_df.groupby("직무")["가중점수"].sum()
+    counts = counts.sort_values(
+        ["종합점수", "1위", "2위", "3위", "직무"],
+        ascending=[False, False, False, False, True],
+    ).head(4)
+    counts.insert(0, "순위", range(1, len(counts) + 1))
+    return counts.reset_index()[["순위", "직무", "종합점수", "1위", "2위", "3위", "4위"]]
+
+
+def render_admin_top4_block(summary: pd.DataFrame, mode: str) -> None:
+    config = MODE_CONFIG[mode]
+    top4 = build_admin_top4(summary, mode)
+    st.subheader(f"{config['icon']} {config['label']} 누적 Top 4")
+    if top4.empty:
+        st.info("아직 완료된 결과가 없습니다.")
+        return
+    medals = {1: "🥇", 2: "🥈", 3: "🥉", 4: "4️⃣"}
+    css_classes = {1: "gold", 2: "silver", 3: "bronze", 4: "fourth"}
+    for row in top4.to_dict("records"):
+        rank = int(row["순위"])
+        job = html.escape(str(row["직무"]))
+        score = int(row["종합점수"])
+        st.markdown(
+            f'<div class="placement-card {css_classes[rank]}">'
+            f'<div class="placement-medal">{medals[rank]}</div>'
+            f'<div><div class="placement-rank">누적 {rank}위 · 종합점수 {score}점</div>'
+            f'<div class="placement-job">{job}</div></div></div>',
+            unsafe_allow_html=True,
+        )
+
+
 def render_admin() -> None:
     configured_password = str(read_optional_app_setting("admin_password", "")).strip()
     st.title("📊 관리자 통계")
@@ -1164,11 +1235,29 @@ def render_admin() -> None:
     summary = pd.DataFrame(records.get("survey_results", []))
     groups = pd.DataFrame(records.get("group_results", []))
     matches = pd.DataFrame(records.get("match_results", []))
+    # 구버전 직무명도 새 표준 명칭으로 합산해 관리자 통계가 끊기지 않게 한다.
+    for column in ("champion", "runner_up", "third_place", "fourth_place"):
+        if column in summary.columns:
+            summary[column] = summary[column].fillna("").astype(str).map(canonical_job_name)
+    if "job" in groups.columns:
+        groups["job"] = groups["job"].fillna("").astype(str).map(canonical_job_name)
+    for column in ("left_job", "right_job", "selected_job", "not_selected_job"):
+        if column in matches.columns:
+            matches[column] = matches[column].fillna("").astype(str).map(canonical_job_name)
     if summary.empty:
         st.info("아직 완료된 응답이 없습니다.")
         return
     if "status" in summary.columns:
         summary = summary[summary["status"].astype(str) == "completed"].copy()
+
+    st.markdown("## 한눈에 보는 누적 4강 결과")
+    st.caption("1위 4점, 2위 3점, 3위 2점, 4위 1점으로 합산한 누적 순위입니다.")
+    preference_col, avoidance_col = st.columns(2, gap="large")
+    with preference_col:
+        render_admin_top4_block(summary, "preference")
+    with avoidance_col:
+        render_admin_top4_block(summary, "avoidance")
+    st.divider()
 
     mode_options = {"전체": "all", "선호조사": "preference", "기피조사": "avoidance"}
     selected_label = st.selectbox("조사 유형", list(mode_options))
@@ -1235,8 +1324,17 @@ def render_admin() -> None:
         counts["종합점수"] = rank_df.groupby("직무")["가중점수"].sum()
         counts["Top4 진입"] = counts[["1위", "2위", "3위", "4위"]].sum(axis=1)
         counts = counts.sort_values(["종합점수", "1위", "2위"], ascending=False)
-        st.caption("종합점수는 1위 4점, 2위 3점, 3위 2점, 4위 1점으로 계산합니다.")
-        st.bar_chart(counts[["종합점수"]].head(15))
+        st.caption("종합점수는 1위 4점, 2위 3점, 3위 2점, 4위 1점으로 계산합니다. 그래프 색상은 금·은·동·보라 순으로 최종 순위를 구분합니다.")
+        chart_counts = counts[["1위", "2위", "3위", "4위"]].head(15).copy()
+        st.bar_chart(
+            chart_counts,
+            horizontal=True,
+            stack=True,
+            color=["#D4AF37", "#A7A9AC", "#CD7F32", "#7C3AED"],
+            height=max(420, min(760, 46 * len(chart_counts))),
+            x_label="Top 4 진입 횟수",
+            y_label="직무",
+        )
         st.dataframe(counts.reset_index(), hide_index=True, width="stretch")
 
     if not filtered_groups.empty and {"job", "group_rank"}.issubset(filtered_groups.columns):
@@ -1285,6 +1383,40 @@ def render_admin() -> None:
         mime="text/csv",
         width="stretch",
     )
+
+    st.divider()
+    with st.expander("⚠️ 기존 설문 결과 전체 초기화"):
+        st.warning(
+            "이 작업은 survey_results, group_results, match_results의 모든 응답 행을 "
+            "삭제하고 헤더만 남깁니다. 삭제한 데이터는 앱에서 복구할 수 없습니다."
+        )
+        confirm_text = st.text_input(
+            '삭제하려면 아래 칸에 정확히 "전체삭제"라고 입력하세요.',
+            key="admin-delete-confirm-text",
+        )
+        delete_confirmed = st.checkbox(
+            "기존 설문 결과를 모두 삭제하는 것에 동의합니다.",
+            key="admin-delete-confirm-checkbox",
+        )
+        if st.button(
+            "기존 설문 결과 전체 삭제",
+            type="primary",
+            width="stretch",
+            disabled=not (confirm_text.strip() == "전체삭제" and delete_confirmed),
+        ):
+            try:
+                cleared = repository.clear_all_survey_data()
+            except Exception as exc:
+                st.error(f"기존 결과 삭제에 실패했습니다: {exc}")
+            else:
+                total_deleted = sum(int(value) for value in cleared.values())
+                st.session_state.completed_results = {}
+                st.success(
+                    f"기존 설문 결과를 모두 삭제했습니다. 총 {total_deleted}개 데이터 행을 삭제하고 "
+                    "세 시트의 헤더만 유지했습니다."
+                )
+                st.rerun()
+
     if st.button("관리자 화면 닫기", width="stretch"):
         st.session_state.admin_granted = False
         reset_to_home()

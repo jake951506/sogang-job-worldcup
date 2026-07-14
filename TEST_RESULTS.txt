@@ -1,16 +1,15 @@
-Sogang Job World Cup Streamlit v3.3.0 - verification report
+Sogang Job World Cup Streamlit v3.5.0 - verification report
 Date: 2026-07-15
 
 Verified changes
 ----------------
-- Optional selection-reason memo is stored in survey_results.selection_reason.
-- Existing sheet schemas remain append-only compatible.
-- Final 1-4 results are rendered vertically with gold, silver, bronze, and fourth-place cards.
-- Admin dashboard supports mode filters, ranking aggregation, group-stage statistics, memo review, and CSV export.
-- setup_local_secrets.py supports an optional admin password.
+- Python compile check passed.
+- Two Academic Affairs job labels now include `교무팀 -`.
+- Legacy names are canonicalized for seeding and administrator statistics.
+- Match-card typography, border thickness, shadow, and mobile styling were increased.
+- Administrator ranking graph now uses four rank-specific colors instead of a single blue series.
 
-Automated verification
-----------------------
-- Python compile check: passed
-- pytest: 21 passed
-- Tournament, seeding, storage, duplicate prevention, secrets conversion, and Streamlit flow regression tests passed.
+Compatibility
+-------------
+- Google Sheets column structure is unchanged.
+- Existing rows using the old two job labels are combined with the new labels in seeding and administrator statistics.

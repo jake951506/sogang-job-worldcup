@@ -611,6 +611,27 @@ class GoogleSheetsRepository:
             MATCH_RESULTS_SHEET: self._worksheets[MATCH_RESULTS_SHEET].get_all_records(),
         }
 
+    def clear_all_survey_data(self) -> dict[str, int]:
+        """세 결과 시트의 응답 행을 모두 삭제하고 헤더만 유지한다."""
+        self.ensure_schema()
+        headers_by_sheet = {
+            SURVEY_RESULTS_SHEET: SURVEY_RESULT_HEADERS,
+            GROUP_RESULTS_SHEET: GROUP_RESULT_HEADERS,
+            MATCH_RESULTS_SHEET: MATCH_RESULT_HEADERS,
+        }
+        cleared: dict[str, int] = {}
+        for title, headers in headers_by_sheet.items():
+            worksheet = self._worksheets[title]
+            existing = worksheet.get_all_values()
+            cleared[title] = max(len(existing) - 1, 0)
+            worksheet.clear()
+            worksheet.update([list(headers)], "A1")
+            try:
+                worksheet.freeze(rows=1)
+            except Exception:
+                pass
+        return cleared
+
     def save_submission(self, bundle: SubmissionBundle) -> dict[str, int | str]:
         self.ensure_schema()
 

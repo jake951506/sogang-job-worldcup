@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-APP_VERSION: Final[str] = "3.3.1"
+APP_VERSION: Final[str] = "3.5.0"
 APP_TITLE: Final[str] = "서강대학교 본부 직무 이상형 월드컵"
 APP_CREDIT: Final[str] = "Developed by JK"
 MAX_PARTICIPANT_NAME_LENGTH: Final[int] = 40
@@ -11,8 +11,8 @@ MAX_SELECTION_REASON_LENGTH: Final[int] = 1000
 JOBS: Final[tuple[str, ...]] = (
     "교무팀 - 전임교원 업적평가·승진·재임용",
     "교무팀 - 전임교원 책임시수",
-    "전임교원 급여 및 보상",
-    "전임교원 신규임용",
+    "교무팀 - 전임교원 급여 및 보상",
+    "교무팀 - 전임교원 신규임용",
     "학사지원팀 - 교과과정 개설·운영",
     "학사지원팀 - 수강신청",
     "학사지원팀 - 졸업사정·과목이수",
@@ -31,9 +31,19 @@ JOBS: Final[tuple[str, ...]] = (
     "대학원혁신전략팀 - 대학원 제도 개편 및 전략기획",
 )
 
+# 구버전 Google Sheets에 저장된 직무명을 현재 표준 직무명으로 합산하기 위한 별칭입니다.
+LEGACY_JOB_NAME_ALIASES: Final[dict[str, str]] = {
+    "전임교원 급여 및 보상": "교무팀 - 전임교원 급여 및 보상",
+    "전임교원 신규임용": "교무팀 - 전임교원 신규임용",
+}
+
+
+def canonical_job_name(value: str) -> str:
+    name = str(value).strip()
+    return LEGACY_JOB_NAME_ALIASES.get(name, name)
+
 # 조 편성에서 같은 소속의 업무가 한 조에 겹치지 않도록 사용하는 분류입니다.
-# 원 목록에서 소속이 생략된 "전임교원 급여 및 보상"과 "전임교원 신규임용"도
-# 확인된 소속에 따라 교무팀으로 분류했습니다. 교무팀의 네 업무는 가능한 경우
+# 두 직무의 화면 명칭에도 교무팀을 명시했습니다. 교무팀의 네 업무는 가능한 경우
 # A~D조에 하나씩 배치됩니다.
 JOB_UNITS: Final[dict[str, str]] = {
     JOBS[0]: "교무팀",

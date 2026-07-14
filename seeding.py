@@ -9,6 +9,7 @@ from constants import (
     AVOIDANCE_PRIMARY_SEED_WEIGHT,
     GROUP_NAMES,
     JOB_UNITS,
+    canonical_job_name,
 )
 
 
@@ -62,11 +63,15 @@ def compute_historical_stats(
     valid_response_count = 0
 
     for ranking in completed_group_rankings:
-        if not _is_valid_ranking(ranking, expected_jobs):
+        normalized_ranking = {
+            group_name: [canonical_job_name(job) for job in ranking.get(group_name, [])]
+            for group_name in GROUP_NAMES
+        }
+        if not _is_valid_ranking(normalized_ranking, expected_jobs):
             continue
         valid_response_count += 1
         for group_name in GROUP_NAMES:
-            for rank, job in enumerate(ranking[group_name], start=1):
+            for rank, job in enumerate(normalized_ranking[group_name], start=1):
                 appearances[job] += 1
                 rank_sums[job] += rank
                 # 1위=1.0, 2위=0.75, 3위=0.5, 4위=0.25, 5위=0.0
